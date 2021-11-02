@@ -1,12 +1,14 @@
 import express from "express";
 import { ReasonPhrases } from "http-status-codes";
 import dbIntegration from "./db";
-import { IResponse } from "./interfaces/responses";
+import { createResponse } from "./interfaces/responses";
 import { getAQuote } from "./quotes";
 var cors = require("cors");
+var compression = require("compression");
 
 const app = express();
 app.use(cors());
+app.use(compression())
 
 const db = new dbIntegration();
 
@@ -24,19 +26,13 @@ app.post("/users/create", async (req, res) => {
   let userID = req.query.userID!;
   let userName = req.query.userName!;
   let createResp = await db.createUser(userID.toString(), userName.toString());
-  let response: IResponse = {
-    message: "",
-		data: null,
-    status: createResp,
-  };
   if (createResp == ReasonPhrases.OK) {
-    response.message = "User Created";
+    res.send(createResponse("User Created", null, createResp));
   } else if (createResp == ReasonPhrases.CONFLICT) {
-    response.message = "User Already Exist";
+    res.send(createResponse("User Already Exist", null, createResp));
   } else if (createResp == ReasonPhrases.INTERNAL_SERVER_ERROR) {
-    response.message = "There is an error in the our server.";
+    res.send(createResponse("Internal Server Error", null, createResp));
   }
-	res.send(response);
 });
 
 app.listen(3001, () => {
