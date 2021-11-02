@@ -1,6 +1,7 @@
 import { ReasonPhrases } from "http-status-codes";
 
-export interface ICreateUser {
+export interface IResponse {
   message: string;
-  code: ReasonPhrases;
+	data: any;
+  status: ReasonPhrases;
 }

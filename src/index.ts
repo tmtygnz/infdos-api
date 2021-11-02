@@ -1,7 +1,7 @@
 import express from "express";
 import { ReasonPhrases } from "http-status-codes";
 import dbIntegration from "./db";
-import { ICreateUser } from "./interfaces/responses";
+import { IResponse } from "./interfaces/responses";
 import { getAQuote } from "./quotes";
 var cors = require("cors");
 
@@ -24,9 +24,10 @@ app.post("/users/create", async (req, res) => {
   let userID = req.query.userID!;
   let userName = req.query.userName!;
   let createResp = await db.createUser(userID.toString(), userName.toString());
-  let response: ICreateUser = {
+  let response: IResponse = {
     message: "",
-    code: createResp,
+		data: null,
+    status: createResp,
   };
   if (createResp == ReasonPhrases.OK) {
     response.message = "User Created";
