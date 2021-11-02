@@ -1,5 +1,7 @@
 import express from "express";
+import { ReasonPhrases } from "http-status-codes";
 import dbIntegration from "./db";
+import { ICreateUser } from "./interfaces/responses";
 import { getAQuote } from "./quotes";
 var cors = require("cors");
 
@@ -21,9 +23,19 @@ app.get("/quote", async (req, res) => {
 app.post("/users/create", async (req, res) => {
   let userID = req.query.userID!;
   let userName = req.query.userName!;
-	console.log(userID);
-  let response = await db.createUser(userID.toString(), userName.toString());
-  res.send(response);
+  let createResp = await db.createUser(userID.toString(), userName.toString());
+  let response: ICreateUser = {
+    message: "",
+    code: createResp,
+  };
+  if (createResp == ReasonPhrases.OK) {
+    response.message = "User Created";
+  } else if (createResp == ReasonPhrases.CONFLICT) {
+    response.message = "User Already Exist";
+  } else if (createResp == ReasonPhrases.INTERNAL_SERVER_ERROR) {
+    response.message = "There is an error in the our server.";
+  }
+	res.send(response);
 });
 
 app.listen(3001, () => {

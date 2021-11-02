@@ -1,6 +1,7 @@
 import { createHash, randomBytes } from "crypto";
 import { config } from "dotenv";
 import admin from "firebase-admin";
+import { ReasonPhrases } from "http-status-codes";
 import { IUser } from "./interfaces/user";
 
 config();
@@ -23,22 +24,26 @@ class dbIntegration {
     return hashed;
   }
 
-  async createUser(uid: string, name: string) {
+  async createUser(uid: string, name: string): Promise<ReasonPhrases> {
     const user = db.collection("users").doc(uid);
     const userRef = await user.get();
 
     if (userRef.exists) {
-      return "user already exist";
+      return ReasonPhrases.CONFLICT;
     } else {
-      let userDefs: IUser = {
-        name: name,
-        key: await this.generateKey(),
-        dateCreated: admin.firestore.Timestamp.now(),
-      };
-			console.log(userDefs);
-      user.set(userDefs);
-      console.log(`user with uid [${uid}] is created`);
-      return "User Created";
+      try {
+        let userDefs: IUser = {
+          name: name,
+          key: await this.generateKey(),
+          dateCreated: admin.firestore.Timestamp.now(),
+        };
+        console.log(userDefs);
+        user.set(userDefs);
+        console.log(`user with uid [${uid}] is created`);
+      } catch {
+        return ReasonPhrases.INTERNAL_SERVER_ERROR;
+      }
+      return ReasonPhrases.OK;
     }
   }
 }
