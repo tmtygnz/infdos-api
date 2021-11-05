@@ -24,7 +24,7 @@ class dbIntegration {
     return hashed;
   }
 
-  async createUser(uid: string, name: string): Promise<ReasonPhrases> {
+  async createUser(uid: string, name: string, profURL:string): Promise<ReasonPhrases> {
     const user = db.collection("users").doc(uid);
     const userRef = await user.get();
 
@@ -35,6 +35,7 @@ class dbIntegration {
         let userDefs: IUser = {
           name: name,
           key: await this.generateKey(),
+          profURL: profURL!,
           dateCreated: admin.firestore.Timestamp.now(),
         };
         console.log(userDefs);
