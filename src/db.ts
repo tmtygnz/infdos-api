@@ -24,7 +24,7 @@ class dbIntegration {
     return hashed;
   }
 
-  async createUser(uid: string, name: string, profURL:string): Promise<ReasonPhrases> {
+  async createUser(uid: string, name: string): Promise<ReasonPhrases> {
     const user = db.collection("users").doc(uid);
     const userRef = await user.get();
 
@@ -35,7 +35,7 @@ class dbIntegration {
         let userDefs: IUser = {
           name: name,
           key: await this.generateKey(),
-          profURL: profURL!,
+          sessionsDone: [],
           dateCreated: admin.firestore.Timestamp.now(),
         };
         console.log(userDefs);
@@ -45,6 +45,16 @@ class dbIntegration {
         return ReasonPhrases.INTERNAL_SERVER_ERROR;
       }
       return ReasonPhrases.OK;
+    }
+  }
+
+  async getUser (uid: string) {
+    const user = db.collection("users").doc(uid);
+    const userRef = await user.get();
+    if (userRef.exists){
+      return {data: userRef, status:ReasonPhrases.OK}
+    } else {
+      return {data: null, status:ReasonPhrases.NOT_FOUND}
     }
   }
 }
